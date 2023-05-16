@@ -1,0 +1,61 @@
+// Define an interface for your repository
+public interface IRepository<T>
+{
+    T GetById(int id);
+    IEnumerable<T> GetAll();
+    void Add(T entity);
+    void Remove(T entity);
+}
+
+// Create a concrete implementation of your repository
+public class MyRepository<T> : IRepository<T> where T : class
+{
+    private readonly DbContext _dbContext;
+
+    public MyRepository(DbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
+    public T GetById(int id)
+    {
+        return _dbContext.Set<T>().Find(id);
+    }
+
+    public IEnumerable<T> GetAll()
+    {
+        return _dbContext.Set<T>().ToList();
+    }
+
+    public void Add(T entity)
+    {
+        _dbContext.Set<T>().Add(entity);
+        _dbContext.SaveChanges();
+    }
+
+    public void Remove(T entity)
+    {
+        _dbContext.Set<T>().Remove(entity);
+        _dbContext.SaveChanges();
+    }
+}
+
+// Use the repository in your code
+public class MyService
+{
+    private readonly IRepository<MyEntity> _repository;
+
+    public MyService(IRepository<MyEntity> repository)
+    {
+        _repository = repository;
+    }
+
+    public void DoSomething()
+    {
+        var entities = _repository.GetAll();
+        // do something with the entities
+    }
+}
+
+// Register the repository in your dependency injection container
+services.AddScoped<IRepository<MyEntity>, MyRepository<MyEntity>>();
